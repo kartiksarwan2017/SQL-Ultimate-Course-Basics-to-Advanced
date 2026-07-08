@@ -70,7 +70,7 @@ SELECT c.customerid,
        o.sales
 FROM customers AS c 
 LEFT JOIN orders AS o 
-ON c.customerid = o.csutomerid
+ON c.customerid = o.customerid
 UNION
 SELECT c.customerid,
        c.firstname,
@@ -79,7 +79,7 @@ SELECT c.customerid,
        o.sales
 FROM customers AS c 
 RIGHT JOIN orders AS o 
-ON c.customerid = o.csutomerid;
+ON c.customerid = o.customerid;
 
 
 
