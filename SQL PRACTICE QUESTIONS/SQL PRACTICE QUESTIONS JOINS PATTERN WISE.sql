@@ -1601,6 +1601,164 @@ CROSS JOIN
 ) s;
 
 
+/*********************** PATTERN - RIGHT JOIN *********************** 
+Clue Words
+show all orders
+all products
+all customers from right table
+
+(Used rarely in interviews.)
+*/
+/* 1.  Display all orders including customers if available. */
+SELECT o.orderid,
+       c.firstname,
+       c.lastname
+FROM customers AS c
+RIGHT JOIN orders AS o 
+ON c.customerid = o.customerid;
+
+
+/* 2.  Display all orders with employee names. */
+SELECT o.orderid,
+       e.firstname,
+       e.lastname
+FROM employees AS e
+RIGHT JOIN orders AS o
+ON e.employeeid = o.salespersonid;
+
+
+/* 3.  Display all orders with product names. */
+SELECT o.orderid, 
+       p.product
+FROM products AS p 
+RIGHT JOIN orders AS o 
+ON p.productid = o.productid;
+
+
+
+/* 4.  Display all orders with customer country. */
+SELECT c.country,
+       o.orderid
+FROM customers AS c 
+RIGHT JOIN orders AS o 
+ON c.customerid = o.customerid;
+
+
+
+/* 5.  Display all orders with department. */
+SELECT e.department, o.orderid
+FROM employees AS e
+RIGHT JOIN orders AS o 
+ON e.employeeid = o.salespersonid;
+
+
+/* 6.  Display all orders including missing products. */
+SELECT *
+FROM products AS p 
+RIGHT JOIN orders AS o
+ON p.productid = o.productid
+AND o.productid IS NULL;
+
+
+/*
+Your query:
+
+RIGHT JOIN orders o
+ON p.productid = o.productid
+AND o.productid IS NULL;
+
+This is not correct.
+
+Why?
+
+The ON clause should define how the tables are related, not filter out rows.
+
+You accidentally changed the join condition.
+
+Correct:
+
+SELECT *
+FROM products p
+RIGHT JOIN orders o
+ON p.productid = o.productid;
+
+If the interviewer instead asks:
+
+Show only orders whose product is missing
+
+then use:
+
+SELECT *
+FROM products p
+RIGHT JOIN orders o
+ON p.productid = o.productid
+WHERE p.productid IS NULL;
+
+
+Rule
+ON → how tables match.
+WHERE → filter the result after joining.
+
+*/
+-- CORRECT QUERY
+SELECT *
+FROM products p
+RIGHT JOIN orders o
+ON p.productid = o.productid
+WHERE p.productid IS NULL;
+
+
+
+/* 7.  Show all orders and product category. */
+SELECT o.orderid,
+       p.category
+FROM products AS p
+RIGHT JOIN orders AS o
+ON p.productid = o.productid;
+
+
+/* 8.  Display all orders and customer score. */
+SELECT o.orderid,
+       c.score
+FROM customers AS c
+RIGHT JOIN orders AS o 
+ON c.customerid = o.customerid;
+
+
+
+/* 9.  Show every order and employee salary. */
+SELECT o.orderid,
+       e.salary
+FROM employees AS e 
+RIGHT JOIN orders AS o 
+ON e.employeeid = o.salespersonid;
+
+
+/* 10. Display all orders and ship status. */
+SELECT orderid,
+       orderstatus
+FROM orders;
+
+
+/*
+Your orders table has:
+
+orderstatus
+
+So a solution is simply:
+
+SELECT orderid,
+       orderstatus
+FROM orders;
+
+No JOIN is needed because both columns are already in the same table.
+
+This is actually another interview skill:
+
+Don't join tables unnecessarily.
+*/
+
+
 
 
 
