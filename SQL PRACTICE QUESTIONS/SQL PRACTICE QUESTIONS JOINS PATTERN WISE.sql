@@ -1126,11 +1126,247 @@ HAVING AVG(o.sales) > (
 );
 
 
+/************************   JOIN + "Both" Conditions   ******************************
+
+Clue Words
+both
+all
+every
+
+Usually solved using:
+
+GROUP BY
+HAVING COUNT(DISTINCT ...)
+
+*/
+
+/* 1. Customers who bought both Clothing and Accessories. */
+SELECT c.firstname,
+       c.lastname
+FROM orders  AS o 
+INNER JOIN customers AS c 
+ON o.customerid = c.customerid
+INNER JOIN products AS p 
+ON o.productid = p.productid
+WHERE p.category IN ('Clothing', 'Accessories') 
+GROUP BY c.customerid, c.firstname, c.lastname
+HAVING COUNT(DISTINCT p.category) = 2;
+
+
+/* 2. Employees who handled both Delivered and Shipped orders. */
+SELECT e.firstname,
+	   e.lastname
+FROM employees AS e 
+INNER JOIN orders AS o 
+ON e.employeeid = o.salespersonid
+WHERE o.orderstatus IN ('Delivered', 'Shipped')
+GROUP BY e.firstname, e.lastname
+HAVING COUNT(DISTINCT o.orderstatus) = 2;
+
+
+/* 3. Customers ordering from all categories. */
+SELECT c.firstname,
+       c.lastname
+FROM customers AS c 
+INNER JOIN orders AS o 
+ON c.customerid = o.customerid
+INNER JOIN products AS p
+ON p.productid = o.productid
+GROUP BY c.customerid, c.firstname, c.lastname
+HAVING COUNT(DISTINCT p.category) = (
+       SELECT COUNT(category)
+       FROM products
+);
+
+
+/*
+Your subquery
+
+SELECT COUNT(category)
+FROM products
+
+Problem:
+
+If products table contains
+
+Accessories
+Accessories
+Accessories
+Clothing
+Clothing
+
+COUNT(category)
+
+returns
+5
+
+But there are only
+2 categories
+
+Correct
+
+HAVING COUNT(DISTINCT p.category)=
+(
+SELECT COUNT(DISTINCT category)
+FROM products
+);
+
+Notice the second DISTINCT.
+
+*/
+-- CORRECT QUERY
+SELECT c.firstname,
+       c.lastname
+FROM customers AS c 
+INNER JOIN orders AS o 
+ON c.customerid = o.customerid
+INNER JOIN products AS p
+ON p.productid = o.productid
+GROUP BY c.customerid, c.firstname, c.lastname
+HAVING COUNT(DISTINCT p.category) = (
+       SELECT COUNT(DISTINCT category)
+       FROM products
+);
+
+
+/* 4. Products sold in both January and February. */
+SELECT p.product
+FROM products AS p 
+INNER JOIN orders AS o 
+ON p.productid = o.productid
+WHERE MONTH(o.orderdate) IN ('01', '02')
+GROUP BY p.productid, p.product
+HAVING COUNT(DISTINCT o.orderdate) = 2;
+
+
+/*
+You wrote
+
+HAVING COUNT(DISTINCT o.orderdate)=2
+
+Question asks
+
+January and February
+
+Not
+
+Two different dates.
+
+Imagine
+
+Jan 1
+Jan 15
+
+Two dates
+
+But
+
+No February.
+
+Your query would incorrectly return that product.
+
+Correct
+
+WHERE MONTH(o.orderdate) IN (1,2)
+
+GROUP BY p.productid,p.product
+
+HAVING COUNT(DISTINCT MONTH(o.orderdate))=2;
+
+This is a classic interview trick.
+*/
+SELECT p.product
+FROM products AS p 
+INNER JOIN orders AS o 
+ON p.productid = o.productid
+WHERE MONTH(o.orderdate) IN ('01', '02')
+GROUP BY p.productid, p.product
+HAVING COUNT(DISTINCT MONTH(o.orderdate)) = 2;
+
+
+
+/* 5. Customers who bought both Bottle and Caps. */
+SELECT c.firstname,
+       c.lastname
+FROM customers AS c
+INNER JOIN orders AS o 
+ON c.customerid = o.customerid
+INNER JOIN products AS p 
+ON p.productid = o.productid
+WHERE p.product IN ('Bottle', 'Caps')
+GROUP BY c.customerid, c.firstname, c.lastname
+HAVING COUNT(DISTINCT p.product) = 2;
+
+
+/* 6. Employees who sold both Accessories and Clothing. */
+SELECT e.firstname,
+       e.lastname
+FROM employees AS e
+INNER JOIN orders AS o 
+ON o.salespersonid = e.employeeid
+INNER JOIN products AS p 
+ON p.productid = o.productid
+WHERE p.category IN ('Accessories', 'Clothing')
+GROUP BY e.employeeid, e.firstname, e.lastname
+HAVING COUNT(DISTINCT p.category) = 2;
+
+
+/* 7. Customers who placed both Delivered and Pending orders. */
+SELECT c.firstname,
+       c.lastname
+FROM customers AS c
+INNER JOIN orders AS o 
+ON c.customerid = o.customerid
+WHERE o.orderstatus IN ('Delivered', 'Pending')
+GROUP BY c.customerid, c.firstname, c.lastname
+HAVING COUNT(DISTINCT o.orderstatus) = 2;
+
+
+/* 8. Products purchased by both USA and Germany customers. */
+SELECT p.product
+FROM products AS p 
+INNER JOIN orders AS o 
+ON p.productid = o.productid
+INNER JOIN customers AS c 
+ON c.customerid = o.customerid
+WHERE c.country IN ('USA', 'Germany')
+GROUP BY p.productid, p.product
+HAVING COUNT(DISTINCT c.country) = 2;
+
+
+/* 9. Employees serving both USA and Germany customers. */
+SELECT e.firstname,
+       e.lastname
+FROM employees AS e
+INNER JOIN orders AS o 
+ON e.employeeid = o.salespersonid
+INNER JOIN customers AS c 
+ON c.customerid  = o.customerid
+WHERE c.country IN ('USA', 'Germany')
+GROUP BY e.employeeid, e.firstname, e.lastname
+HAVING COUNT(DISTINCT c.country) = 2;
+
+
+/* 10. Customers ordering from more than one category. */
+SELECT c.firstname,
+       c.lastname
+FROM customers AS c 
+INNER JOIN orders AS o 
+ON c.customerid = o.customerid
+INNER JOIN products p
+ON p.productid = o.productid
+GROUP BY c.firstname, c.lastname
+HAVING COUNT(DISTINCT p.category) > 1;
 
 
 
 
- 
+
+
+
+
+
+
 
 
 
