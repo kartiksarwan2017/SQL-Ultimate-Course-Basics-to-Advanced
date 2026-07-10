@@ -1359,10 +1359,246 @@ GROUP BY c.firstname, c.lastname
 HAVING COUNT(DISTINCT p.category) > 1;
 
 
+/***************** PATTERN - CROSS JOIN  *****************
+
+Clue Words
+every combination
+all combinations
+each with every
+possible combinations
+
+Use
+CROSS JOIN
+
+*/
+/* 1. Show every customer with every product. */
+SELECT c.firstname,
+       c.lastname,
+       p.product
+FROM customers AS c 
+CROSS JOIN orders AS o
+CROSS JOIN products AS p;
+
+
+/*
+The Main Mistake
+
+Almost every query looks like this:
+
+FROM customers c
+CROSS JOIN orders o
+CROSS JOIN products p
+
+Ask yourself:
+
+Does the question ask anything about orders?
+
+For Q1:
+
+Show every customer with every product.
+
+We only need
+
+customers
+products
+
+There is no need for orders.
+
+Adding orders creates duplicate rows because every customer-product pair is repeated once for every order.
+
+*/
+
+-- CORRECT QUERY
+SELECT c.firstname,
+       c.lastname,
+       p.product
+FROM customers c
+CROSS JOIN products p;
+
+/* 2. Show every employee with every customer. */
+SELECT e.firstname AS emp_firstname,
+       e.lastname AS emp_lastname,
+       c.firstname AS cust_firstname,
+       c.lastname AS cust_lastname
+FROM employees AS e 
+CROSS JOIN customers AS c;
 
 
 
+/* 3. Show every department with every category. */
+SELECT e.department,
+       p.category
+FROM employees AS e 
+CROSS JOIN orders AS o
+CROSS JOIN products AS p;
 
+/*
+You wrote
+
+employees
+CROSS JOIN orders
+CROSS JOIN products
+
+Correct
+
+SELECT DISTINCT
+       e.department,
+       p.category
+FROM employees e
+CROSS JOIN products p;
+
+Notice another improvement.
+
+Departments repeat.
+
+Marketing
+Marketing
+Sales
+Sales
+
+Categories repeat.
+
+Accessories
+Accessories
+Clothing
+
+Use
+
+DISTINCT
+*/
+-- CORRECT QUERY
+SELECT DISTINCT
+       e.department,
+       p.category
+FROM employees e
+CROSS JOIN products p;
+
+
+
+/* 4. Display every employee with every product. */
+SELECT e.firstname,
+       e.lastname,
+       p.product
+FROM employees AS e
+CROSS JOIN products AS p;
+
+
+
+/* 5. Show every customer with every salesperson. */
+SELECT c.firstname AS customer_firstname,
+	   c.lastname AS customer_lastname,
+       e.firstname AS salesperson_firstname,
+       e.lastname AS salesperson_lastname
+FROM customers AS c
+CROSS JOIN employees AS e;
+
+
+/* 6. Show every country with every category. */
+SELECT c.country,
+	   p.category
+FROM customers AS c
+CROSS JOIN products AS p;
+
+
+/*
+Again,
+DISTINCT
+because countries repeat.
+*/
+
+
+-- CORRECT QUERY
+SELECT DISTINCT
+       c.country,
+       p.category
+FROM customers c
+CROSS JOIN products p;
+
+
+/* 7. Display every employee-product pair. */
+SELECT e.firstname,
+       e.lastname,
+       p.product
+FROM employees AS e
+CROSS JOIN products AS p;
+
+
+
+/* 8. Generate all customer-product combinations. */
+SELECT c.firstname,
+       c.lastname,
+       p.product
+FROM customers AS c
+CROSS JOIN products p;
+
+
+/* 9. Show every product with every department. */
+SELECT p.product,
+       e.department
+FROM products AS p 
+CROSS JOIN employees AS e;
+
+-- CORRECT QUERY
+SELECT DISTINCT
+       p.product,
+       e.department
+FROM products p
+CROSS JOIN employees e;
+
+
+/* 10. Display every customer with every order status. */
+SELECT c.firstname,
+	   c.lastname,
+       o.orderstatus
+FROM customers AS c
+CROSS JOIN orders AS o;
+
+
+/*
+This one is actually good.
+
+Why?
+
+Because
+
+Order status comes from
+
+orders
+
+There is no separate status table.
+
+So
+
+customers
+CROSS JOIN orders
+
+works.
+
+If you wanted unique statuses, then:
+
+SELECT c.firstname,
+       c.lastname,
+       s.orderstatus
+FROM customers c
+CROSS JOIN
+(
+    SELECT DISTINCT orderstatus
+    FROM orders
+) s;
+
+This avoids repeating "Delivered" multiple times.
+*/
+
+-- CORRECT QUERY
+SELECT c.firstname,
+       c.lastname,
+       s.orderstatus
+FROM customers c
+CROSS JOIN
+(
+    SELECT DISTINCT orderstatus
+    FROM orders
+) s;
 
 
 
