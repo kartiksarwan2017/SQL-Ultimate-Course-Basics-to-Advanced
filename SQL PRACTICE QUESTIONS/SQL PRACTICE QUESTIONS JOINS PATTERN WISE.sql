@@ -313,6 +313,260 @@ ON c.customerid = o.customerid
 LEFT JOIN employees AS e 
 ON e.employeeid = o.salespersonid;
 
+/******************** Pattern 3 — LEFT ANTI JOIN **********************
+Clue Words
+never
+no
+without
+haven't
+did not
+
+Use
+LEFT JOIN ...
+WHERE right_table.id IS NULL
+*/
+/* 1. Customers who never ordered.  */
+SELECT c.firstname,
+       c.lastname
+FROM customers AS c 
+LEFT JOIN orders AS o 
+ON c.customerid = o.customerid
+WHERE o.customerid IS NULL;
+
+
+/* 2. Employees who never handled any order. */
+SELECT DISTINCT e.firstname, e.lastname
+FROM employees AS e 
+LEFT JOIN orders AS o 
+ON e.employeeid = o.salespersonid
+WHERE o.salespersonid = NULL;
+
+/*
+Your query
+
+WHERE o.salespersonid = NULL;
+Mistake
+
+Never compare with NULL using =.
+
+Use
+IS NULL
+*/
+SELECT DISTINCT e.firstname, e.lastname
+FROM employees AS e 
+LEFT JOIN orders AS o 
+ON e.employeeid = o.salespersonid
+WHERE o.salespersonid IS NULL;
+
+
+/* 3. Products never sold. */
+SELECT DISTINCT p.product
+FROM products AS p 
+LEFT JOIN orders AS o 
+ON p.productid = o.productid
+WHERE o.productid IS NULL;
+
+/* 4. Customers without delivered orders. */
+SELECT c.firstname,
+       c.lastname
+FROM customers AS c 
+LEFT JOIN orders AS o 
+ON c.customerid = o.customerid
+AND o.orderstatus = 'Delivered'
+WHERE o.customerid IS NULL;
+
+
+/* 5. Products never purchased by USA customers. */
+SELECT product
+FROM products AS p 
+LEFT JOIN orders AS o 
+ON p.productid = o.productid
+LEFT JOIN customers AS c 
+ON o.customerid = c.customerid
+AND c.country <> 'USA'
+WHERE c.customerid IS NULL AND o.productid IS NULL;
+
+
+/*
+Question
+
+Products never purchased by USA customers
+
+Your query
+
+LEFT JOIN customers
+ON ...
+AND c.country <> 'USA'
+
+This reverses the logic.
+Instead filter USA inside the JOIN, not non-USA.
+*/
+SELECT p.product
+FROM products p
+LEFT JOIN orders o
+ON p.productid=o.productid
+LEFT JOIN customers c
+ON o.customerid=c.customerid
+AND c.country='USA'
+WHERE c.customerid IS NULL;
+
+
+
+/* 6. Employees without German customers. */
+SELECT e.firstname,
+       e.lastname
+FROM employees AS e 
+LEFT JOIN orders AS o 
+ON e.employeeid = o.salespersonid
+LEFT JOIN customers AS c 
+ON c.customerid = o.customerid
+AND c.country <> 'Germany'
+WHERE o.salespersonid IS NULL AND o.customerid IS NULL;
+
+/* You used
+
+country <> Germany
+which changes the meaning completely. */
+
+-- CORRECT QUERY
+SELECT e.firstname,
+       e.lastname
+FROM employees AS e 
+LEFT JOIN orders AS o 
+ON e.employeeid = o.salespersonid
+LEFT JOIN customers AS c 
+ON c.customerid = o.customerid
+AND c.country = 'Germany'
+WHERE o.salespersonid IS NULL AND o.customerid IS NULL;
+
+
+/* 7. Customers who never bought Clothing. */
+SELECT c.firstname,
+	   c.lastname
+FROM customers AS c 
+LEFT JOIN orders AS o 
+ON c.customerid = o.customerid
+LEFT JOIN products AS p 
+ON p.productid = o.productid
+AND p.category = 'Clothing'
+WHERE o.customerid IS NULL AND o.productid IS NULL;
+
+/*
+LEFT JOIN products
+AND p.category='Clothing'
+
+WHERE o.customerid IS NULL
+
+The problem is you're checking whether no order exists, instead of no Clothing purchase exists.
+
+Notice
+
+We check
+p.productid IS NULL
+
+not
+o.customerid IS NULL
+*/
+SELECT c.firstname,
+       c.lastname
+FROM customers c
+LEFT JOIN orders o
+ON c.customerid=o.customerid
+LEFT JOIN products p
+ON o.productid=p.productid
+AND p.category='Clothing'
+WHERE p.productid IS NULL;
+
+
+
+/* 8. Products never ordered in January. */
+SELECT p.product
+FROM products AS p 
+LEFT JOIN orders AS o 
+ON p.productid = o.productid
+AND MONTH(o.orderdate) != '01'
+WHERE o.productid IS NULL;
+
+/*
+Think carefully.
+
+That means
+
+Join every order except January.
+Exactly opposite.
+
+Notice
+
+We JOIN January.
+Then ask
+Where January doesn't exist.
+*/
+SELECT p.product
+FROM products p
+LEFT JOIN orders o
+ON p.productid=o.productid
+AND MONTH(o.orderdate)=1
+WHERE o.productid IS NULL;
+
+
+
+/* 9. Employees without shipped orders. */
+SELECT e.firstname,
+       e.lastname
+FROM employees AS e 
+LEFT JOIN orders AS o 
+ON e.employeeid = o.salespersonid
+AND o.orderstatus <> 'Shipped'
+WHERE o.salespersonid IS NULL;
+
+
+-- CORRECT QUERY
+SELECT e.firstname,
+       e.lastname
+FROM employees AS e 
+LEFT JOIN orders AS o 
+ON e.employeeid = o.salespersonid
+AND o.orderstatus = 'Shipped'
+WHERE o.salespersonid IS NULL;
+
+
+/* 10. Customers who never purchased Accessories. */
+SELECT c.firstname,
+       c.lastname
+FROM customers AS c 
+LEFT JOIN orders AS o 
+ON c.customerid = o.customerid
+LEFT JOIN products AS p 
+ON p.productid = o.productid
+AND p.category <> 'Accessories'
+WHERE o.customerid IS NULL AND o.productid IS NULL;
+
+-- CORRECT QUERY
+SELECT c.firstname,
+       c.lastname
+FROM customers c
+LEFT JOIN orders o
+ON c.customerid=o.customerid
+LEFT JOIN products p
+ON o.productid=p.productid
+AND p.category='Accessories'
+WHERE p.productid IS NULL;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
