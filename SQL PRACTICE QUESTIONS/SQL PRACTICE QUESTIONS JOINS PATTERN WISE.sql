@@ -553,6 +553,209 @@ AND p.category='Accessories'
 WHERE p.productid IS NULL;
 
 
+/********************** Multiple Table JOIN (3+ Tables) *******************
+
+Clue Words
+Need information from multiple entities.
+*/
+/* 1. Show customer name, product name and salesperson. */
+SELECT c.firstname AS cust_firstname,
+       c.lastname AS cust_lastname,
+       p.product AS product_name,
+       e.firstname AS salesperson_firstname,
+       e.lastname AS salesperson_lastname
+FROM orders AS o
+INNER JOIN customers AS c 
+ON c.customerid = o.customerid
+INNER JOIN products AS p 
+ON p.productid = o.productid
+INNER JOIN employees AS e 
+ON e.employeeid = o.salespersonid;
+
+
+/* 2. Display customer, department and product. */
+SELECT c.firstname,
+       c.lastname,
+       e.department,
+       p.product
+FROM orders AS o 
+INNER JOIN customers AS c 
+ON c.customerid = o.customerid
+INNER JOIN employees AS e 
+ON e.employeeid = o.salespersonid
+INNER JOIN products AS p 
+ON p.productid = o.productid;
+
+
+/* 3. Show order, customer, employee and product. */
+SELECT o.orderid,
+       c.firstname AS customer_firstname,
+       c.lastname AS customer_lastname,
+       e.firstname AS employee_firstname,
+       e.lastname AS employee_lastname,
+       p.product AS product_name
+FROM orders AS o 
+INNER JOIN customers AS c 
+ON o.customerid = c.customerid
+INNER JOIN employees AS e 
+ON o.salespersonid = e.employeeid
+INNER JOIN products AS p 
+ON o.productid = p.productid;
+
+
+/* 4. Display customer country, product category and sales. */
+SELECT c.firstname,
+       c.lastname,
+       c.country,
+       p.category,
+       o.sales
+FROM customers AS c
+INNER JOIN orders AS o 
+ON c.customerid = o.customerid
+INNER JOIN products AS p 
+ON p.productid = o.productid;
+
+
+/* 5. Show employee, customer, product and quantity. */
+SELECT e.firstname AS employee_firstname,
+       e.lastname AS employee_lastname,
+       c.firstname AS customer_firstname,
+       c.lastname AS customer_lastname,
+       p.product AS product_name,
+       o.quantity AS quantity
+FROM orders AS o 
+INNER JOIN employees AS e 
+ON e.employeeid = o.salespersonid
+INNER JOIN customers AS c
+ON c.customerid = o.customerid
+INNER JOIN products AS p 
+ON p.productid = o.productid;
+
+
+/* 6. Display customer score, product price and sales. */
+SELECT c.score,
+       p.price,
+       o.sales
+FROM customers AS c 
+INNER JOIN orders AS o 
+ON c.customerid = o.customerid
+INNER JOIN products AS p 
+ON p.productid = o.productid;
+
+
+
+/* 7. Show department, product category and revenue. */
+SELECT e.department,
+       p.category,
+       SUM(o.sales) AS revenue
+FROM orders AS o 
+INNER JOIN employees AS e
+ON o.salespersonid = e.employeeid
+INNER JOIN products AS p 
+ON p.productid = o.productid
+GROUP BY e.department, p.category;
+
+
+
+/* 8. Display customer, product and order status. */
+SELECT c.firstname,
+       c.lastname,
+	   p.product,
+       o.orderstatus
+FROM customers AS c 
+INNER JOIN orders AS o 
+ON c.customerid = o.customerid 
+INNER JOIN products AS p 
+ON p.productid = o.productid;
+
+
+
+/* 9. Show customer, employee and ship date. */
+SELECT c.firstname AS customer_firstname,
+       c.lastname AS customer_lastname,
+       e.firstname AS employee_firstname,
+       e.lastname AS employee_lastname,
+       o.shipdate
+FROM customers AS c 
+INNER JOIN orders AS o 
+ON c.customerid = o.customerid
+INNER JOIN employees AS e
+ON e.employeeid = o.salespersonid;
+	   
+
+
+/* 10. Display complete sales report with customer, employee, product and sales */
+SELECT c.firstname,
+       c.lastname,
+       e.firstname,
+       e.lastname,
+       p.product,
+       o.sales
+FROM customers AS c 
+INNER JOIN orders AS o 
+ON c.customerid = o.customerid
+INNER JOIN employees AS e 
+ON e.employeeid = o.salespersonid
+INNER JOIN products AS p 
+ON p.productid = o.productid;
+
+
+/*
+Small Suggestions
+
+Instead of
+
+SELECT c.firstname,
+       c.lastname,
+       e.firstname,
+       e.lastname
+
+prefer
+
+SELECT
+c.firstname AS customer_firstname,
+c.lastname AS customer_lastname,
+e.firstname AS employee_firstname,
+e.lastname AS employee_lastname
+
+because duplicate column names become confusing.
+
+*/
+SELECT  c.firstname AS customer_firstname,
+		c.lastname AS customer_lastname,
+		e.firstname AS employee_firstname,
+		e.lastname AS employee_lastname,
+        p.product,
+        o.sales
+FROM customers AS c 
+INNER JOIN orders AS o 
+ON c.customerid = o.customerid
+INNER JOIN employees AS e 
+ON e.employeeid = o.salespersonid
+INNER JOIN products AS p 
+ON p.productid = o.productid;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
