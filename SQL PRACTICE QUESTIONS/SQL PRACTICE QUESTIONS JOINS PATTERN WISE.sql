@@ -1759,6 +1759,140 @@ Don't join tables unnecessarily.
 */
 
 
+/**************************** PATTERN -  RIGHT ANTI JOIN   ******************************
+Clue Words
+Missing rows from left table.
+
+*/
+/* 1. Orders without customers. */
+SELECT o.orderid
+FROM customers AS c
+RIGHT JOIN orders AS o 
+ON c.customerid = o.customerid
+WHERE c.customerid IS NULL;
+
+
+/* 2. Orders without employees. */
+SELECT o.orderid
+FROM employees AS e 
+RIGHT JOIN orders AS o 
+ON e.employeeid = o.salespersonid
+WHERE e.employeeid IS NULL;
+
+
+
+/* 3. Orders without products. */
+SELECT o.orderid
+FROM products AS p
+RIGHT JOIN orders AS o
+ON p.productid = o.productid
+WHERE p.productid IS NULL;
+
+
+/* 4. Products without supplier (if schema exists). */
+/* No Supplier Schema */
+
+
+/* 5. Orders without salesperson. */
+SELECT o.orderid
+FROM employees AS e 
+RIGHT JOIN orders AS o
+ON e.employeeid = o.salespersonid
+WHERE e.employeeid IS NULL;
+
+
+
+/* 6. Orders missing customer information. */
+SELECT o.orderid
+FROM customers AS c
+RIGHT JOIN orders AS o
+ON c.customerid = o.customerid
+WHERE c.customerid IS NULL;
+
+
+/* 7. Orders without billing address. */
+SELECT orderid
+FROM orders
+WHERE billaddress IS NULL;
+
+/*
+Notice something interesting?
+No JOIN needed.
+Because the requirement is not
+Missing customer
+
+It is
+Missing bill address
+Bill address is already inside Orders.
+Excellent.
+*/
+
+/* 8. Orders without ship address. */
+SELECT orderid
+FROM orders 
+WHERE shipaddress IS NULL;
+
+
+/* 9. Orders without quantity. */
+SELECT orderid
+FROM orders
+WHERE quantity IS NULL;
+
+/*
+Although your sample data has
+
+0
+not
+NULL
+
+These are different.
+
+Interviewers intentionally test this.
+
+Remember
+NULL
+means
+Unknown
+while
+0
+
+means
+Known value = zero
+
+*/
+
+-- CORRECT QUERY
+SELECT orderid
+FROM orders
+WHERE quantity = 0;
+
+/* 10. Orders without sales. */
+SELECT orderid
+FROM orders
+WHERE sales IS NULL;
+
+/*
+dataset has
+
+sales = 0 ?
+
+No.
+Actually every row has sales.
+
+So result would be empty.
+
+That's okay.
+*/
+
+-- CORRECT QUERY
+SELECT orderid
+FROM orders
+WHERE sales = 0;
+
+
+
+
+
 
 
 
