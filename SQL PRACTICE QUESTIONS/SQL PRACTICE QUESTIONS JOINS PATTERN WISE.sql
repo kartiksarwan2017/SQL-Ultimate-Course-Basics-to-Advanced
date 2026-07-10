@@ -735,6 +735,182 @@ ON e.employeeid = o.salespersonid
 INNER JOIN products AS p 
 ON p.productid = o.productid;
 
+/**************************** Pattern 10 — JOIN + GROUP BY ****************************
+Clue Words
+each
+per
+every
+total
+*/
+/* 1. Total sales per customer.  */
+SELECT c.firstname,
+       c.lastname,
+       SUM(o.sales) AS total_sales
+FROM customers AS c 
+INNER JOIN orders AS o 
+ON c.customerid = o.customerid
+GROUP BY c.customerid, c.firstname, c.lastname;
+
+
+/* 2. Total revenue per employee. */
+SELECT e.firstname,
+       e.lastname,
+       SUM(o.sales) AS total_revenue
+FROM employees AS e 
+INNER JOIN orders AS o 
+ON e.employeeid = o.salespersonid
+GROUP BY e.employeeid, e.firstname, e.lastname;
+
+
+/* 3. Orders handled by each salesperson. */
+SELECT e.firstname,
+       e.lastname,
+	   COUNT(o.orderid) AS num_orders
+FROM employees AS e
+INNER JOIN orders AS o 
+ON e.employeeid = o.salespersonid
+GROUP BY e.employeeid, e.firstname, e.lastname;
+
+
+
+/* 4. Quantity sold per product. */
+SELECT p.product,
+       SUM(o.quantity) AS total_quantity
+FROM products AS p 
+INNER JOIN orders AS o
+ON p.productid = o.productid
+GROUP BY p.productid, p.product;
+
+
+
+/* 5. Revenue per category. */
+SELECT p.category,
+       SUM(o.sales) AS revenue
+FROM products AS p 
+INNER JOIN orders AS o 
+ON p.productid = o.productid
+GROUP BY p.category;
+
+
+/* 6. Customers served per employee. */
+SELECT e.firstname,
+       e.lastname,
+       COUNT(c.customerid) AS num_customers
+FROM orders AS o
+INNER JOIN employees AS e
+ON e.employeeid = o.salespersonid
+INNER JOIN customers AS c 
+ON c.customerid = o.customerid
+GROUP BY e.employeeid, e.firstname, e.lastname;
+
+/*
+Your query
+COUNT(c.customerid)
+
+This works if the requirement means:
+Number of customer-orders handled.
+However, if the interviewer asks:
+Customers served per employee
+they usually mean unique customers.
+
+Example:
+Employee A serves
+Customer 1
+Customer 1
+Customer 1
+Customer 2
+
+Your answer returns
+4
+
+The interviewer probably expects
+2
+*/
+
+-- CORRECT QUERY 
+SELECT e.firstname,
+       e.lastname,
+       COUNT(DISTINCT c.customerid) AS unique_customers
+FROM orders o
+JOIN employees e
+ON e.employeeid = o.salespersonid
+JOIN customers c
+ON c.customerid = o.customerid
+GROUP BY e.employeeid, e.firstname, e.lastname;
+
+
+/* 7. Products sold per customer. */
+SELECT c.firstname, 
+       c.lastname,
+	   COUNT(p.productid) AS num_products
+FROM products AS p 
+INNER JOIN orders AS o 
+ON p.productid = o.productid
+INNER JOIN customers AS c
+ON c.customerid = o.customerid
+GROUP BY c.customerid, c.firstname, c.lastname;
+
+/*
+Your query
+
+COUNT(p.productid)
+Again,
+depends on wording.
+
+If question means
+total products ordered
+it's okay.
+
+If interviewer means
+different products purchased
+
+then use
+COUNT(DISTINCT p.productid)
+
+Always ask yourself:
+Do they mean total or unique?
+*/
+
+
+
+/* 8. Total sales per country. */
+SELECT c.country,
+       SUM(o.sales) AS total_sales
+FROM customers AS c 
+INNER JOIN orders AS o 
+ON c.customerid = o.customerid
+GROUP BY c.country;
+
+
+
+/* 9. Revenue per department. */
+SELECT e.department,
+       SUM(o.sales) AS revenue
+FROM employees AS e 
+INNER JOIN orders AS o 
+ON e.employeeid = o.salespersonid
+GROUP BY e.department;
+
+
+
+/* 10. Total quantity per category. */
+SELECT p.category,
+       SUM(o.quantity) AS total_quantity
+FROM products AS p 
+INNER JOIN orders AS o 
+ON p.productid = o.productid
+GROUP BY p.category;
+
+
+
+
+
+
+
+
+
+
+
 
 
 
