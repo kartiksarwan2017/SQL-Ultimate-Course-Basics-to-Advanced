@@ -902,6 +902,239 @@ ON p.productid = o.productid
 GROUP BY p.category;
 
 
+/***************** Pattern — JOIN + HAVING *****************
+Clue Words
+more than
+greater than
+average greater than
+total greater than
+*/
+/* 1. Customers with more than five orders. */
+SELECT c.firstname,
+	   c.lastname,
+       COUNT(o.orderid) AS num_orders
+FROM customers AS c 
+INNER JOIN orders AS o 
+ON c.customerid = o.customerid
+GROUP BY c.customerid, c.firstname, c.lastname
+HAVING COUNT(o.orderid) > 5;
+
+
+
+/* 2. Employees handling more than ten orders. */
+SELECT e.firstname,
+       e.lastname,
+       COUNT(o.orderid) AS num_orders
+FROM employees AS e
+INNER JOIN orders AS o 
+ON e.employeeid = o.salespersonid
+GROUP BY e.employeeid, e.firstname, e.lastname
+HAVING COUNT(o.orderid) > 10;
+
+
+/* 3. Products with revenue above 1000. */
+SELECT p.product,
+       SUM(o.sales) AS revenue
+FROM products AS p
+INNER JOIN orders AS o 
+ON p.productid = o.productid
+GROUP BY p.productid, p.product
+HAVING SUM(o.sales) > 1000;
+
+/*
+otice how your thinking has improved:
+
+Revenue
+
+↓
+
+Sales comes from orders
+
+↓
+
+Need products
+
+↓
+
+JOIN
+
+↓
+
+SUM
+
+↓
+
+HAVING
+
+This is exactly the reasoning interviewers expect.
+*/
+
+
+/* 4. Categories with average price above 20. */
+SELECT category,
+       AVG(price) AS avg_price
+FROM products
+GROUP BY category
+HAVING AVG(price) > 20;
+
+
+
+/* 5. Countries with more than three customers. */
+SELECT country,
+       COUNT(*) AS num_customers
+FROM customers
+GROUP BY country
+HAVING COUNT(*) > 3;
+
+/* No JOIN required because all information comes from one table. */
+
+
+/* 6. Employees with average sales above 50. */
+SELECT e.firstname,
+       e.lastname,
+       AVG(o.sales) AS avg_sales
+FROM employees AS e
+INNER JOIN orders AS o 
+ON e.employeeid = o.salespersonid
+GROUP BY e.employeeid, e.firstname, e.lastname
+HAVING AVG(o.sales) > 50;
+
+
+
+/* 7. Products sold more than ten times. */
+SELECT p.product,
+       COUNT(o.orderid) AS num_orders
+FROM products AS p 
+INNER JOIN orders AS o 
+ON p.productid = o.productid
+GROUP BY p.productid, p.product
+HAVING COUNT(o.orderid) > 10;
+
+/*
+Your query:
+
+COUNT(o.orderid)
+
+This is correct if the interviewer means:
+
+Product appeared in more than 10 orders.
+
+Sometimes interviewers mean:
+
+Total quantity sold.
+
+Then it becomes
+
+HAVING SUM(o.quantity) > 10;
+
+Always ask yourself:
+
+"Sold" means number of orders or quantity?
+*/
+-- CORRECT QUERY
+SELECT p.product,
+       SUM(o.quantity) AS num_orders
+FROM products AS p 
+INNER JOIN orders AS o 
+ON p.productid = o.productid
+GROUP BY p.productid, p.product
+HAVING SUM(o.quantity) > 10;
+
+
+/* 8. Customers spending above 200. */
+SELECT e.firstname,
+       e.lastname,
+       SUM(o.sales) AS total_sales
+FROM employees AS e 
+INNER JOIN orders AS o 
+ON e.employeeid = o.salespersonid
+GROUP BY e.employeeid, e.firstname, e.lastname
+HAVING SUM(o.sales) > 200;
+
+/*
+This one is incorrect.
+
+The question says:
+Customers spending above 200
+
+But your query starts from
+
+
+employees
+You grouped by employees instead of customers.
+
+Why this happened
+
+This isn't a SQL mistake.
+
+It is a requirement interpretation mistake.
+
+Read the first noun carefully.
+
+Customers spending
+
+↓
+
+customers table
+
+↓
+
+orders table
+
+↓
+
+SUM
+
+↓
+
+GROUP BY customer
+
+*/
+
+-- CORRECT QUERY
+SELECT c.firstname,
+       c.lastname,
+       SUM(o.sales) AS total_sales
+FROM customers AS c
+INNER JOIN orders AS o
+ON c.customerid = o.customerid
+GROUP BY c.customerid,
+         c.firstname,
+         c.lastname
+HAVING SUM(o.sales) > 200;
+
+
+/* 9. Departments with total salary above 200000. */
+SELECT department,
+       SUM(salary) AS total_salary
+FROM employees
+GROUP BY department
+HAVING SUM(salary) > 200000;
+
+
+
+/* 10. Products with average sales above company average. */
+SELECT p.product,
+       AVG(o.sales) AS avg_sales
+FROM products AS p 
+INNER JOIN orders AS o 
+ON p.productid = o.productid
+GROUP BY p.productid, p.product
+HAVING AVG(o.sales) > (
+	   SELECT AVG(sales)
+       FROM orders
+);
+
+
+
+
+
+
+ 
+
+
+
+
 
 
 
