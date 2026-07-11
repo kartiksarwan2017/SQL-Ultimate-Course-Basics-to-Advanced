@@ -1890,6 +1890,233 @@ FROM orders
 WHERE sales = 0;
 
 
+/**************************** FULL JOIN ***********************
+
+Clue Words
+all records from both tables
+matched or unmatched
+
+*/
+/* 1. Show all customers and all orders.  */
+SELECT c.firstname,
+       c.lastname,
+       o.orderid
+FROM customers AS c
+LEFT JOIN orders AS o
+ON c.customerid = o.customerid
+UNION
+SELECT c.firstname,
+	   c.lastname,
+       o.orderid
+FROM customers AS c 
+RIGHT JOIN orders AS o
+ON c.customerid = o.customerid;
+
+
+/* 2. Show all employees and all handled orders. */
+SELECT e.firstname,
+       e.lastname,
+       o.orderid
+FROM employees AS e
+LEFT JOIN orders AS o
+ON e.employeeid = o.salespersonid
+UNION
+SELECT e.firstname,
+	   e.lastname,
+       o.orderid
+FROM employees AS e
+RIGHT JOIN orders AS o
+ON e.employeeid = o.salespersonid;
+
+
+
+/* 3. Show all products and all orders. */
+SELECT p.product,
+       o.orderid
+FROM products AS p 
+LEFT JOIN orders AS o
+ON p.productid = o.productid
+UNION
+SELECT p.product,
+	   o.orderid
+FROM products AS p
+RIGHT JOIN orders AS o
+ON p.productid = o.productid;
+
+
+
+/* 4. Display every customer and every salesperson. */
+SELECT c.firstname AS cust_firstname,
+       c.lastname AS cust_lastname,
+       e.firstname AS emp_firstname,
+       e.lastname AS emp_lastname
+FROM customers AS c
+LEFT JOIN orders AS o
+ON c.customerid = o.customerid
+LEFT JOIN employees AS e
+ON e.employeeid = o.salespersonid
+UNION
+SELECT c.firstname AS cust_firstname,
+       c.lastname AS cust_lastname,
+       e.firstname AS emp_firstname,
+       e.lastname AS emp_lastname
+FROM customers AS c
+RIGHT JOIN orders AS o
+ON c.customerid = o.customerid
+RIGHT JOIN employees AS e
+ON e.employeeid = o.salespersonid;
+
+/*
+Your query becomes
+
+Customers
+↓
+
+Orders
+↓
+
+Employees
+
+This is not what the question asks.
+
+The question says
+
+Every customer
+
+Every salesperson
+
+It doesn't say
+
+Every order.
+
+So bringing orders into the picture changes the meaning.
+
+This question is actually a bit misleading because customers and employees have no direct relationship without orders.
+
+A better interview question would be:
+
+Show all customers and all employees (Cartesian relationship)
+
+or
+
+Show all customers and the salesperson who handled them.
+
+If the intention was "through orders", your query is acceptable.
+*/
+
+
+
+/* 5. Display all departments and handled orders. */
+SELECT e.department,
+       o.orderid
+FROM employees AS e 
+LEFT JOIN orders AS o
+ON e.employeeid = o.salespersonid
+UNION
+SELECT e.department,
+       o.orderid
+FROM employees AS e
+RIGHT JOIN orders AS o
+ON e.employeeid = o.salespersonid;
+
+
+/* 6. Display all customers and shipped orders. */
+SELECT c.firstname,
+       c.lastname,
+       o.orderid
+FROM customers AS c 
+LEFT JOIN orders AS o
+ON c.customerid = o.customerid
+AND o.orderstatus = 'Shipped'
+UNION
+SELECT c.firstname,
+       c.lastname,
+       o.orderid
+FROM customers AS c 
+RIGHT JOIN orders AS o
+ON c.customerid = o.customerid
+AND o.orderstatus = 'Shipped';
+
+
+/* 7. Display all products and delivered orders. */
+SELECT p.product,
+       o.orderid
+FROM products AS p 
+LEFT JOIN orders AS o
+ON p.productid = o.productid
+AND o.orderstatus = 'Delivered'
+UNION
+SELECT p.product,
+       o.orderid
+FROM products AS p
+RIGHT JOIN orders AS o
+ON p.productid = o.productid
+AND o.orderstatus = 'Delivered';
+
+
+
+/* 8. Show all employees and customers. */
+SELECT e.firstname,
+       e.lastname,
+       c.firstname,
+       c.lastname
+FROM employees AS e
+LEFT JOIN orders AS o
+ON e.employeeid = o.salespersonid
+LEFT JOIN customers AS c
+ON c.customerid = o.customerid
+UNION
+SELECT e.firstname,
+       e.lastname,
+       c.firstname,
+       c.lastname
+FROM employees AS e
+RIGHT JOIN orders AS o
+ON e.employeeid = o.salespersonid
+RIGHT JOIN customers AS c
+ON c.customerid = o.customerid;
+
+
+
+/* 9. Display all products and quantities. */
+SELECT p.product, 
+       o.quantity 
+FROM products AS p
+LEFT JOIN orders AS o
+ON p.productid = o.productid
+UNION
+SELECT p.product, 
+      o.quantity
+FROM products AS p
+RIGHT JOIN orders AS o
+ON p.productid = o.productid;
+
+
+
+/* 10. Show all customers and sales. */
+SELECT c.firstname,
+       c.lastname,
+       o.sales
+FROM customers AS c
+LEFT JOIN orders AS o
+ON c.customerid = o.customerid
+UNION
+SELECT c.firstname,
+       c.lastname,
+       o.sales
+FROM customers AS c
+RIGHT JOIN orders AS o
+ON c.customerid = o.customerid;
+
+
+
+
+
+
+
+
+
+
 
 
 
