@@ -2110,6 +2110,246 @@ ON c.customerid = o.customerid;
 
 
 
+/********************** FULL ANTI JOIN  ***********************
+Clue Words
+Rows existing in only one table.
+*/
+/* 1. Customers without orders and orders without customers. */
+SELECT c.firstname,
+       c.lastname,
+       o.orderid
+FROM customers AS c
+LEFT JOIN orders AS o
+ON c.customerid = o.customerid
+WHERE c.customerid IS NULL or o.customerid IS NULL
+UNION
+SELECT c.firstname,
+       c.lastname,
+       o.orderid
+FROM customers AS c
+RIGHT JOIN orders AS o
+ON c.customerid = o.customerid
+WHERE c.customerid IS NULL or o.customerid IS NULL;
+
+/*
+In a LEFT JOIN, every customer always exists, so c.customerid IS NULL can never happen.
+
+Rule:
+
+LEFT JOIN → check the right table.
+RIGHT JOIN → check the left table.
+*/
+-- CORRECT QUERY
+SELECT c.firstname,
+       c.lastname,
+       o.orderid
+FROM customers c
+LEFT JOIN orders o
+ON c.customerid = o.customerid
+WHERE o.customerid IS NULL
+UNION
+SELECT c.firstname,
+       c.lastname,
+       o.orderid
+FROM customers c
+RIGHT JOIN orders o
+ON c.customerid = o.customerid
+WHERE c.customerid IS NULL;
+
+
+/* 2. Products without sales and sales without products. */
+SELECT p.product,
+       o.sales
+FROM products AS p
+LEFT JOIN orders AS o
+ON p.productid = o.productid
+WHERE o.productid IS NULL
+UNION
+SELECT p.product,
+       o.sales
+FROM products AS p
+RIGHT JOIN orders AS o
+ON p.productid = o.productid
+WHERE p.productid IS NULL;
+
+
+
+/* 3. Employees without orders and orders without employees. */
+SELECT e.firstname,
+       e.lastname,
+       o.orderid
+FROM employees AS e
+LEFT JOIN orders AS o
+ON e.employeeid = o.salespersonid
+WHERE o.salespersonid IS NULL
+UNION
+SELECT e.firstname,
+       e.lastname,
+       o.orderid
+FROM employees AS e
+RIGHT JOIN orders AS o
+ON e.employeeid = o.salespersonid
+WHERE e.employeeid IS NULL;
+
+
+/* 4. Customers without sales and sales without customers. */
+SELECT c.firstname,
+       c.lastname,
+       o.sales
+FROM customers AS c
+LEFT JOIN orders AS o
+ON c.customerid = o.customerid
+WHERE o.customerid IS NULL
+UNION
+SELECT c.firstname,
+       c.lastname,
+       o.sales
+FROM customers AS c
+RIGHT JOIN orders AS o
+ON c.customerid = o.customerid
+WHERE c.customerid IS NULL;
+
+
+
+/* 5. Products not sold and orders with deleted products. */
+SELECT p.product,
+       o.orderid
+FROM products AS p
+LEFT JOIN orders AS o
+ON p.productid = o.productid
+WHERE o.productid IS NULL
+UNION
+SELECT p.product,
+       o.orderid
+FROM products AS p
+RIGHT JOIN orders AS o
+ON p.productid = o.productid
+WHERE p.productid IS NULL;
+
+
+
+/* 6. Employees without customers and customers without employees. */
+SELECT e.firstname AS emp_firstname,
+       e.lastname AS emp_lastname,
+       c.firstname AS cust_firstname,
+       c.lastname AS cust_lastname
+FROM employees AS e
+LEFT JOIN orders AS o
+ON e.employeeid = o.salespersonid
+LEFT JOIN customers AS c
+ON c.customerid = o.customerid
+WHERE c.customerid IS NULL OR e.employeeid IS NULL
+UNION
+SELECT e.firstname AS emp_firstname,
+       e.lastname AS emp_lastname,
+       c.firstname AS cust_firstname,
+       c.lastname AS cust_lastname
+FROM employees AS e
+RIGHT JOIN orders AS o
+ON e.employeeid = o.salespersonid
+RIGHT JOIN customers AS c
+ON c.customerid = o.customerid
+WHERE c.customerid IS NULL OR e.employeeid IS NULL;
+
+
+/*
+This question is actually not a good FULL ANTI JOIN question.
+
+Why?
+
+Employees and customers don't have a direct relationship.
+They are related through orders.
+So "employees without customers" can mean:
+employees who never handled an order.
+while
+"customers without employees"
+can mean
+customers who never placed an order.
+These are two separate anti joins, not a single FULL ANTI JOIN.
+
+So don't worry about this one.
+*/
+
+
+/* 7. Products without quantity and quantities without products. */
+SELECT p.product,
+       o.quantity
+FROM products AS p
+LEFT JOIN orders AS o 
+ON p.productid = o.productid
+WHERE o.productid IS NULL
+UNION
+SELECT p.product,
+       o.quantity
+FROM products AS p
+RIGHT JOIN orders AS o 
+ON p.productid = o.productid
+WHERE p.productid IS NULL;
+
+
+
+/* 8. Customers without invoices and invoices without customers. */
+/* There is not invoices table */
+
+
+/* 9. Employees without departments and departments without employees. */
+SELECT firstname,
+       lastname,
+       department
+FROM employees 
+WHERE department IS NULL 
+UNION
+SELECT firstname,
+       lastname,
+       department
+FROM employees 
+WHERE firstname IS NULL OR lastname IS NULL;
+
+
+/*
+Your schema has only
+employees.department
+There is no Department table.
+So the second half
+departments without employees
+cannot be solved.
+*/
+-- CORRECT QUERY
+SELECT *
+FROM employees
+WHERE department IS NULL;
+
+
+/* 10.  Products without categories and categories without products. */
+SELECT product,
+       category
+FROM products 
+WHERE category IS NULL
+UNION
+SELECT product,
+	   category
+FROM products
+WHERE product IS NULL;
+
+/*
+You only have
+products.category
+There is no Categories table.
+
+So
+categories without products
+cannot exist.
+Only
+*/
+SELECT product,
+       category
+FROM products
+WHERE category IS NULL;
+
+
+
+
+
 
 
 
