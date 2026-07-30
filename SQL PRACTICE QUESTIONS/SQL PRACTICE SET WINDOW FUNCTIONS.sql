@@ -263,3 +263,481 @@ SELECT OrderID,
        Sales,
        SUM(Sales) OVER(PARTITION BY SalesPersonID) AS TotalSalesPerSalesPerson
 FROM Sales.Orders;
+
+
+/*
+Pattern 3 — Running Aggregate (ORDER BY)
+
+Clue Words
+
+cumulative
+running
+till now
+progressive total
+
+Think
+
+SUM(...) OVER(
+ORDER BY ...
+)
+*/
+/*
+Q21 Display every order with the running total sales based on OrderDate.
+*/
+SELECT OrderID,
+       OrderDate,
+       Sales,
+       SUM(Sales) OVER(ORDER BY OrderDate) AS TotalSales
+FROM Sales.Orders;
+
+
+
+/*
+Q22 Display every order with the running count of orders.
+*/
+SELECT OrderID,
+       OrderDate,
+       COUNT(OrderID) OVER(ORDER BY OrderDate) AS RunningCountOfOrders
+FROM Sales.Orders;
+
+
+
+/*
+Q23 Display every order with the running average sales.
+*/
+SELECT OrderID,
+       OrderDate,
+       Sales,
+       AVG(Sales) OVER(ORDER BY OrderDate) AS RunningAverageSales
+FROM Sales.Orders;
+
+
+/*
+Q24 Display every order with the running maximum sales.
+*/
+SELECT OrderID,
+       OrderDate,
+       Sales,
+       MAX(Sales) OVER(ORDER BY OrderDate) AS RunningMaximumSales
+FROM Sales.Orders;
+
+
+
+/*
+Q25 Display every order with the running minimum sales.
+*/
+SELECT OrderID,
+       OrderDate,
+       Sales,
+       MIN(Sales) OVER(ORDER BY OrderDate) AS RunningMinimumSales
+FROM Sales.Orders;
+
+
+/*
+Pattern 4 — Ranking Functions (Basic)
+
+Clue Words
+
+rank
+top
+highest
+lowest
+order
+
+Think
+
+ROW_NUMBER()
+
+RANK()
+
+DENSE_RANK()
+
+NTILE()
+*/
+/*
+Q26 Assign a row number to every employee based on salary (highest first).
+*/
+SELECT EmployeeID,
+       Salary,
+       ROW_NUMBER() OVER(ORDER BY Salary DESC) AS EmployeeRanking
+FROM Sales.Employees;
+
+/*
+Q27 Assign a rank to every employee based on salary.
+*/
+SELECT EmployeeID,
+       Salary,
+       RANK() OVER(ORDER BY Salary) AS RankBasedOnSalary
+FROM Sales.Employees;
+
+/*
+This is syntactically correct.
+
+However, in interviews, when they say:
+
+"Rank employees based on salary"
+
+the default assumption is usually highest salary gets Rank 1.
+
+So I would write:
+
+SELECT EmployeeID,
+       Salary,
+       RANK() OVER(ORDER BY Salary DESC) AS RankBasedOnSalary
+FROM Sales.Employees;
+*/
+
+/*
+Q28 Assign a dense rank to every employee based on salary.
+*/
+SELECT EmployeeID,
+       Salary,
+       DENSE_RANK() OVER(ORDER BY Salary) AS EmployeeRank
+FROM Sales.Employees;
+
+/*
+because ranking generally implies the highest value gets the best rank unless the question specifies otherwise.
+*/
+SELECT EmployeeID,
+       Salary,
+       DENSE_RANK() OVER(ORDER BY Salary DESC) AS EmployeeRank
+FROM Sales.Employees;
+
+
+/*
+Q29 Assign a row number to every order based on sales.
+ask yourself:
+
+Should the biggest sales get Row 1?
+Usually yes.
+
+*/
+SELECT OrderID,
+       OrderDate,
+       Sales,
+       ROW_NUMBER() OVER(ORDER BY Sales DESC) AS EmployeeRank
+FROM Sales.Orders;
+
+
+/*
+Q30 Assign a rank to every product based on price.
+*/
+SELECT ProductID,
+       Product,
+       Price,
+       RANK() OVER(ORDER BY Price DESC) AS ProductRanking
+FROM Sales.Products;
+
+
+/*
+Pattern 5 — Ranking + PARTITION BY
+
+Clue Words
+
+within department
+per customer
+within category
+*/
+/*
+Q31 Assign row numbers to employees within each department based on salary.
+*/
+SELECT EmployeeID,
+       FirstName,
+       LastName,
+       Department,
+       Salary,
+       ROW_NUMBER() OVER(PARTITION BY Department ORDER BY Salary DESC) AS SalesRank
+FROM Sales.Employees;
+
+
+/*
+Q32
+Rank employees within each department.
+*/
+SELECT EmployeeID,
+       FirstName,
+       LastName,
+       Department,
+       RANK() OVER(PARTITION BY Department ORDER BY Salary DESC) AS DepartmentRank
+FROM Sales.Employees;
+
+
+/*
+Q33
+Dense rank products within each category based on price.
+*/
+SELECT ProductID,
+       Product,
+       Category,
+       Price,
+       DENSE_RANK() OVER(PARTITION BY Category ORDER BY Price DESC) AS PriceRank
+FROM Sales.Products;
+
+/*
+Q34
+Assign row numbers to orders of each customer based on order date.
+*/
+SELECT OrderID,
+       CustomerID,
+       OrderDate,
+       ROW_NUMBER() OVER(PARTITION BY CustomerID ORDER BY OrderDate) AS OrderDateRank
+FROM Sales.Orders;
+
+/*
+Q35
+Rank orders of every customer based on sales.
+*/
+SELECT OrderID,
+       CustomerID,
+       Sales,
+       RANK() OVER(PARTITION BY CustomerID ORDER BY Sales DESC) AS SalesRank
+FROM Sales.Orders;
+
+/*
+Q36
+Dense rank customers within each country based on score.
+*/
+SELECT CustomerID,
+       FirstName,
+       LastName,
+       Country, 
+       Score,
+       DENSE_RANK() OVER(PARTITION BY Country ORDER BY Score DESC) AS ScoreRank
+FROM Sales.Customers;
+
+/*
+Q37
+Assign row numbers to products within each category based on price.
+*/
+SELECT ProductID,
+       Product,
+       Category, 
+       Price,
+       ROW_NUMBER() OVER(PARTITION BY Category ORDER BY Price DESC) AS PriceRank
+FROM Sales.Products;
+
+/*
+Q38
+Rank products within each category based on price.
+*/
+SELECT ProductID,
+       Product,
+       Category,
+       Price,
+       RANK() OVER(PARTITION BY Category ORDER BY Price DESC) AS PriceRank
+FROM Sales.Products;
+
+/*
+Q39
+Assign row numbers to orders handled by each salesperson based on sales.
+*/
+SELECT OrderID,
+       SalesPersonID,
+       OrderDate,
+       Sales,
+       ROW_NUMBER() OVER(PARTITION BY SalesPersonID ORDER BY Sales DESC) AS SalesRank
+FROM Sales.Orders;
+
+/*
+Q40
+Rank employees within each department by birth date (oldest first).
+*/
+SELECT EmployeeID,
+       FirstName,
+       LastName,
+       Department,
+       BirthDate,
+       RANK() OVER(PARTITION BY Department ORDER BY BirthDate) AS BirthDateRank
+FROM Sales.Employees;
+
+
+/*
+Pattern 6 — Interview Favorites
+These are the questions interviewers ask most often.
+*/
+/*
+Q41
+Display the highest paid employee.
+(Hint: RANK() or ROW_NUMBER())
+*/
+SELECT *
+FROM 
+(
+    SELECT EmployeeID,
+            FirstName,
+            LastName,
+            Salary,
+            RANK() OVER(ORDER BY Salary DESC) AS SalaryRank
+    FROM Sales.Employees
+) t
+WHERE SalaryRank = 1;
+
+
+
+/*
+Q42
+Display the second highest salary.
+*/
+SELECT *
+FROM (
+    SELECT EmployeeID,
+           Salary,
+           RANK() OVER(ORDER BY Salary DESC) AS SalaryRank
+    FROM Sales.Employees
+) t 
+WHERE SalaryRank = 2;
+
+/*
+Q43
+Display the top 2 salaries.
+*/
+SELECT TOP 2 SalaryRank, 
+       EmployeeID,
+       Salary
+FROM (
+    SELECT EmployeeID,
+           Salary,
+           ROW_NUMBER() OVER(ORDER BY Salary DESC) AS SalaryRank
+    FROM Sales.Employees
+) t;
+
+SELECT *
+FROM (
+    SELECT EmployeeID,
+           Salary,
+           ROW_NUMBER() OVER(ORDER BY Salary DESC) AS SalaryRank
+    FROM Sales.Employees
+) t
+WHERE SalaryRank <= 2;
+
+/*
+Q44
+Display the highest selling order.
+*/
+SELECT *
+FROM (
+    SELECT OrderID,
+           OrderDate,
+           Sales,
+           RANK() OVER(ORDER BY Sales DESC) AS SalesRank
+    FROM Sales.Orders
+) t
+WHERE SalesRank = 1;
+
+/*
+Q45
+Display the top-selling product based on total sales.
+*/
+SELECT *
+FROM (
+    SELECT p.ProductID,
+           p.Product,
+           SUM(o.Sales) AS TotalSales,
+           ROW_NUMBER() OVER(ORDER BY SUM(o.Sales) DESC) AS SalesRank
+    FROM Sales.Products AS p
+    INNER JOIN Sales.Orders AS o
+    ON p.ProductID = o.ProductID
+    GROUP BY p.ProductID, p.Product
+) t
+WHERE SalesRank = 1;
+
+
+/*
+Q46
+Display the latest order of every customer.
+*/
+SELECT *
+FROM (
+    SELECT c.CustomerID,
+           c.FirstName,
+           c.LastName,
+           o.OrderID,
+           o.OrderDate,
+           ROW_NUMBER() OVER(PARTITION BY c.CustomerID ORDER BY o.OrderDate DESC) AS OrderDateRank
+    FROM Sales.Customers AS c
+    INNER JOIN Sales.Orders AS o
+    ON c.CustomerID = o.CustomerID
+) t
+WHERE OrderDateRank = 1;
+
+
+SELECT *
+FROM (
+    SELECT CustomerID,
+           OrderID,
+           OrderDate,
+           ROW_NUMBER() OVER(PARTITION BY CustomerID ORDER BY OrderDate DESC) AS OrderDateRank
+    FROM Sales.Orders
+) t
+WHERE OrderDateRank = 1;
+
+
+
+
+
+/*
+Q47
+Display the highest sale made by every salesperson.
+*/
+SELECT *
+FROM (
+    SELECT OrderID,
+           SalesPersonID,
+           Sales,
+           RANK() OVER(PARTITION BY SalesPersonID ORDER BY Sales DESC) AS SalesRank
+    FROM Sales.Orders
+) t
+WHERE SalesRank = 1;
+
+/*
+Q48
+Display the highest priced product in each category.
+*/
+SELECT *
+FROM (
+    SELECT ProductID,
+           Product,
+           Category,
+           Price,
+           RANK() OVER(PARTITION BY Category ORDER BY Price DESC) AS PriceRank
+    FROM Sales.Products
+) t
+WHERE PriceRank = 1;
+
+/*
+Q49
+Display the top 2 customers based on total sales.
+*/
+SELECT *
+FROM (
+    SELECT CustomerID,
+           SUM(Sales) AS TotalSales,
+           ROW_NUMBER() OVER(ORDER BY SUM(Sales) DESC) AS SalesRank
+    FROM Sales.Orders
+    GROUP BY CustomerID
+) t
+WHERE SalesRank <= 2;
+
+/*
+Use:
+
+ROW_NUMBER() OVER(ORDER BY SUM(Sales) DESC)
+
+or even better:
+
+RANK() OVER(ORDER BY SUM(Sales) DESC)
+
+if you want tied customers included.
+*/
+
+
+/*
+Q50
+Divide employees into 4 salary groups using NTILE(4).
+*/
+SELECT EmployeeID,
+       FirstName,
+       LastName,
+       Salary,
+       NTILE(4) OVER(ORDER BY Salary) AS EmployeeGroups
+FROM Sales.Employees;
