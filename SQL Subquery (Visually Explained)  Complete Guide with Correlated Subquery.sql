@@ -124,6 +124,80 @@ WHERE CustomerID NOT IN (
       WHERE Country = 'Germany'
 );
 
+/*
+SQL TASK
+Find female employees whose salaries are greater than the salaries of any male employees
+*/
+-- Main Query
+SELECT EmployeeID,
+       FirstName,
+       LastName, 
+       Salary
+FROM Sales.Employees
+WHERE Gender = 'F'
+AND Salary > ANY (SELECT Salary FROM Sales.Employees WHERE Gender = 'M');
+
+/*
+SQL TASK
+Find female employees whose salaries are greater than the salaries of all male employees
+*/
+SELECT EmployeeID,
+       FirstName,
+       LastName,
+       Salary
+FROM Sales.Employees
+WHERE Gender = 'F'
+AND Salary > ALL (SELECT Salary FROM Sales.Employees WHERE Gender = 'M');
+
+
+/*
+SQL TASK
+Show all customer details and find the total orders for each customer.
+*/
+-- Main Query
+SELECT *,
+       (SELECT COUNT(*) FROM Sales.Orders o WHERE o.CustomerID = c.CustomerID) AS TotalSales
+FROM Sales.Customers c;
+
+
+/*
+SQL TASK
+Show the order details for customers in Germany.
+*/
+-- Main Query
+SELECT *
+FROM Sales.Orders o
+WHERE EXISTS (
+      SELECT 1
+      FROM Sales.Customers c
+      WHERE Country = 'Germany'
+      AND c.CustomerID = o.CustomerID
+);
+
+
+/*
+SQL TASK
+Show the order details for customers Not in Germany
+*/
+SELECT *
+FROM Sales.Orders o
+WHERE NOT EXISTS (
+          SELECT 1
+          FROM Sales.Customers c
+          WHERE Country = 'Germany'
+          AND c.CustomerID = o.CustomerID
+);
+
+
+
+
+
+
+
+
+
+
+
 
 
 
