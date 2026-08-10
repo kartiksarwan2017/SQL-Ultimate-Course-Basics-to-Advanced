@@ -151,20 +151,3 @@ CREATE VIEW Sales.V_Order_Details_EU AS (
 
 SELECT *
 FROM Sales.V_Order_Details_EU;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
