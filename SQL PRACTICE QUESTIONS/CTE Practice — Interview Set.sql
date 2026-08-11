@@ -872,9 +872,35 @@ Use a CTE containing LAG().
 
 Then calculate the difference outside the CTE.
 */
+-- USING DERIVED TABLE
+SELECT OrderID,
+       OrderDate,
+       Sales,
+       PreviousSales,
+       Sales - PreviousSales AS SalesDifference
+FROM (
+    SELECT OrderID,
+           OrderDate,
+           Sales,
+           LAG(Sales) OVER(ORDER BY OrderDate) AS PreviousSales
+    FROM Sales.Orders
+) t;
 
 
-
+-- USING CTES
+WITH CTE_Orders AS (
+    SELECT OrderID,
+           OrderDate,
+           Sales,
+           LAG(Sales) OVER(ORDER BY OrderDate) AS PreviousSales
+    FROM Sales.Orders
+)
+SELECT OrderID,
+       OrderDate,
+       Sales,
+       PreviousSales,
+       Sales - PreviousSales AS SalesDifference
+FROM CTE_Orders;
 
 
 /*
@@ -897,8 +923,28 @@ LAG()
  ↓
 WHERE Sales > PreviousSales
 */
+-- USING DERIVED TABLE
+SELECT *
+FROM (
+     SELECT OrderID,
+            OrderDate,
+            Sales,
+            LAG(Sales) OVER(ORDER BY OrderDate) AS PreviousSales
+     FROM Sales.Orders
+) t
+WHERE Sales > PreviousSales;
 
-
+-- USING CTES
+WITH CTE_Orders AS (
+     SELECT OrderID,
+            OrderDate,
+            Sales,
+            LAG(Sales) OVER(ORDER BY OrderDate) AS PreviousSales
+     FROM Sales.Orders
+)
+SELECT *
+FROM CTE_Orders
+WHERE Sales > PreviousSales;
 
 
 
@@ -915,6 +961,56 @@ DaysBetweenOrders
 
 Use LAG() inside a CTE and calculate the date difference outside.
 */
+WITH CTE_CustomersOrders AS (
+     SELECT CustomerID,
+            OrderID,
+            OrderDate,
+            LAG(OrderDate) OVER(ORDER BY OrderDate) AS PreviousOrderDate
+     FROM Sales.Orders
+)
+SELECT CustomerID,
+       OrderID,
+       OrderDate,
+       PreviousOrderDate,
+       DATEDIFF(day, PreviousOrderDate, OrderDate) AS DaysBetweenOrders
+FROM CTE_CustomersOrders;
+
+
+/*
+You wrote:
+
+LAG(OrderDate) OVER(ORDER BY OrderDate)
+
+But the question says:
+
+For every customer
+
+That means you must separate the calculation customer by customer.
+
+You forgot:
+
+PARTITION BY CustomerID
+
+Your current query compares:
+
+each order with the previous order across all customers.
+
+That's not what the business question asks.
+*/
+-- CORRECT QUERY
+WITH CTE_CustomersOrders AS (
+     SELECT CustomerID,
+            OrderID,
+            OrderDate,
+            LAG(OrderDate) OVER(PARTITION BY CustomerID ORDER BY OrderDate) AS PreviousOrderDate
+     FROM Sales.Orders
+)
+SELECT CustomerID,
+       OrderID,
+       OrderDate,
+       PreviousOrderDate,
+       DATEDIFF(day, PreviousOrderDate, OrderDate) AS DaysBetweenOrders
+FROM CTE_CustomersOrders;
 
 
 /************* Pattern 6 — CTE + Multiple Window Functions ************/
@@ -938,8 +1034,22 @@ AVG() OVER()
 MAX() OVER()
 RANK() OVER()
 */
-
-
+WITH CTE_Employees AS (
+    SELECT EmployeeID,
+           Department,
+           Salary,
+           AVG(Salary) OVER(PARTITION BY Department) AS DepartmentAverageSalary,
+           MAX(Salary) OVER(PARTITION BY Department) AS DepartmentHighestSalary,
+           RANK() OVER(PARTITION BY Department ORDER BY Salary DESC) AS SalaryRank
+    FROM Sales.Employees
+) 
+SELECT EmployeeID,
+       Department,
+       Salary,
+       DepartmentAverageSalary,
+       DepartmentHighestSalary,
+       SalaryRank
+FROM CTE_Employees;
 
 
 /*
@@ -966,5 +1076,17 @@ SUM() OVER()
 ROW_NUMBER()
 PARTITION BY
 */
-
-
+WITH CTE_Customers_Orders AS (
+    SELECT CustomerID,
+           OrderID,
+           OrderDate,
+           Sales,
+           FIRST_VALUE(OrderDate) OVER(PARTITION BY CustomerID ORDER BY OrderDate) AS FirstOrderDate,
+           LAST_VALUE(OrderDate) OVER(PARTITION BY CustomerID ORDER BY OrderDate ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS LatestOrderDate,
+           LAG(OrderDate) OVER(PARTITION BY CustomerID ORDER BY OrderDate) AS PreviousOrderDate,
+           SUM(Sales) OVER(PARTITION BY CustomerID) AS CustomerTotalSales,
+           ROW_NUMBER() OVER(PARTITION BY CustomerID ORDER BY OrderDate) AS CustomerOrderRank
+    FROM Sales.Orders
+)
+SELECT *
+FROM CTE_Customers_Orders;
